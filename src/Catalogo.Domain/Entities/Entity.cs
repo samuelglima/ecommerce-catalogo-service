@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Catalogo.Domain.Events;
 
 namespace Catalogo.Domain.Entities
 {
@@ -7,6 +9,13 @@ namespace Catalogo.Domain.Entities
     /// </summary>
     public abstract class Entity
     {
+        private List<IEvent> _domainEvents;
+        
+        /// <summary>
+        /// Eventos de domínio pendentes
+        /// </summary>
+        public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents?.AsReadOnly();
+
         /// <summary>
         /// Identificador único da entidade
         /// </summary>
@@ -26,6 +35,32 @@ namespace Catalogo.Domain.Entities
         {
             Id = Guid.NewGuid();
             DataCriacao = DateTime.UtcNow;
+            _domainEvents = new List<IEvent>();
+        }
+
+        /// <summary>
+        /// Adiciona um evento de domínio
+        /// </summary>
+        protected void AddDomainEvent(IEvent eventItem)
+        {
+            _domainEvents = _domainEvents ?? new List<IEvent>();
+            _domainEvents.Add(eventItem);
+        }
+
+        /// <summary>
+        /// Remove um evento de domínio
+        /// </summary>
+        public void RemoveDomainEvent(IEvent eventItem)
+        {
+            _domainEvents?.Remove(eventItem);
+        }
+
+        /// <summary>
+        /// Limpa todos os eventos de domínio
+        /// </summary>
+        public void ClearDomainEvents()
+        {
+            _domainEvents?.Clear();
         }
 
         /// <summary>

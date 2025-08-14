@@ -23,6 +23,7 @@ namespace Catalogo.Infrastructure.Repositories
         public Task<T> AdicionarAsync(T entity)
         {
             _entities.Add(entity);
+            // IMPORTANTE: Retornar a mesma instância para manter os eventos
             return Task.FromResult(entity);
         }
 
@@ -33,6 +34,7 @@ namespace Catalogo.Infrastructure.Repositories
             {
                 _entities[index] = entity;
             }
+            // IMPORTANTE: Não limpar os eventos aqui
             return Task.CompletedTask;
         }
 

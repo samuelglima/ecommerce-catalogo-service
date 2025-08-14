@@ -1,4 +1,5 @@
 using System;
+using Catalogo.Domain.Events;
 using Catalogo.Domain.Interfaces;
 using Catalogo.Domain.ValueObjects;
 
@@ -70,6 +71,10 @@ namespace Catalogo.Domain.Entities
             Sku = sku.ToUpperInvariant();
             Categoria = categoria;
             Ativo = true;
+
+            // Adicionar evento de produto criado
+            AddDomainEvent(new ProdutoCriadoEvent(
+                Id, Nome, Sku, preco, QuantidadeEstoque, Categoria));
         }
 
         /// <summary>
@@ -96,8 +101,13 @@ namespace Catalogo.Domain.Entities
             if (novoPreco <= 0)
                 throw new ArgumentException("O preço deve ser maior que zero", nameof(novoPreco));
 
+            var precoAnterior = Preco.Valor;
             Preco = new Dinheiro(novoPreco);
             MarcarComoAtualizado();
+
+            // Adicionar evento de preço alterado
+            AddDomainEvent(new PrecoAlteradoEvent(
+                Id, Sku, precoAnterior, novoPreco));
         }
 
         /// <summary>
@@ -108,8 +118,13 @@ namespace Catalogo.Domain.Entities
             if (quantidade <= 0)
                 throw new ArgumentException("A quantidade deve ser maior que zero", nameof(quantidade));
 
+            var quantidadeAnterior = QuantidadeEstoque;
             QuantidadeEstoque += quantidade;
             MarcarComoAtualizado();
+
+            // Adicionar evento de estoque atualizado
+            AddDomainEvent(new EstoqueAtualizadoEvent(
+                Id, Sku, quantidadeAnterior, QuantidadeEstoque, "Adicao"));
         }
 
         /// <summary>
@@ -123,8 +138,13 @@ namespace Catalogo.Domain.Entities
             if (QuantidadeEstoque < quantidade)
                 throw new InvalidOperationException($"Estoque insuficiente. Disponível: {QuantidadeEstoque}, Solicitado: {quantidade}");
 
+            var quantidadeAnterior = QuantidadeEstoque;
             QuantidadeEstoque -= quantidade;
             MarcarComoAtualizado();
+
+            // Adicionar evento de estoque atualizado
+            AddDomainEvent(new EstoqueAtualizadoEvent(
+                Id, Sku, quantidadeAnterior, QuantidadeEstoque, "Remocao"));
         }
 
         /// <summary>
@@ -143,6 +163,10 @@ namespace Catalogo.Domain.Entities
         {
             Ativo = false;
             MarcarComoAtualizado();
+
+            // Adicionar evento de produto desativado
+            AddDomainEvent(new ProdutoDesativadoEvent(
+                Id, Sku, Nome));
         }
 
         /// <summary>

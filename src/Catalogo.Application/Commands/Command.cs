@@ -8,6 +8,8 @@ namespace Catalogo.Application.Commands
     public abstract class Command
     {
         public DateTime Timestamp { get; protected set; }
+        
+        // UsuarioId é OPCIONAL - pode ser usado para auditoria futura
         public string UsuarioId { get; set; }
 
         protected Command()

@@ -19,6 +19,8 @@ namespace Catalogo.API.Configurations
             // Registrar Services
             services.AddScoped<IProdutoService, ProdutoService>();
 
+            // O Event Bus já é registrado no RabbitMQConfig
+
             return services;
         }
     }

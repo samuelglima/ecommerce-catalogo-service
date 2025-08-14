@@ -1,13 +1,16 @@
 using Catalogo.API.Configurations;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configurar serviços
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        // Desabilitar validação automática de nullable reference types
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    })
     .AddJsonOptions(options =>
     {
         // Configurar serialização JSON
@@ -35,11 +38,20 @@ builder.Services.AddCors(options =>
         });
 });
 
+// Adicionar RabbitMQ e MassTransit
+builder.Services.AddRabbitMQConfiguration(builder.Configuration);
+
 // Adicionar Injeção de Dependência
 builder.Services.AddDependencyInjection();
 
 // Adicionar HealthChecks
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddRabbitMQ(   sp => {
+            var factory = new ConnectionFactory() { Uri = new Uri("amqp://admin:admin123@localhost:5672/") };
+            return factory.CreateConnectionAsync();
+        },
+        name: "rabbitmq",
+        tags: new[] { "message-broker" });
 
 var app = builder.Build();
 
@@ -76,5 +88,6 @@ app.Logger.LogInformation("🚀 Catálogo API iniciada com sucesso!");
 app.Logger.LogInformation($"📍 Ambiente: {app.Environment.EnvironmentName}");
 app.Logger.LogInformation("📚 Documentação disponível em: /swagger");
 app.Logger.LogInformation("💚 Health check disponível em: /health");
+app.Logger.LogInformation("🐰 RabbitMQ configurado e conectado");
 
 app.Run();
