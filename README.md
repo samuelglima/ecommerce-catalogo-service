@@ -30,8 +30,23 @@ dotnet build
 # Executar
 dotnet run --project src/Catalogo.API
 
-🧪 Testes
-bashdotnet test
+## 🧪 Testes
+
+### Executar todos os testes
+dotnet test
+Executar com detalhes
+bashdotnet test --logger "console;verbosity=detailed"
+Executar com cobertura
+bashdotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+
+Estrutura de Testes
+
+Catalogo.Domain.Tests: Testes unitários do domínio
+Catalogo.Application.Tests: Testes da camada de aplicação
+Catalogo.API.Tests: Testes dos controllers
+Catalogo.Integration.Tests: Testes de integração
+
+
 📋 Funcionalidades
 
  Cadastro de produtos
